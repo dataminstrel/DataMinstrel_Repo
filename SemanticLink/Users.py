@@ -32,7 +32,7 @@ import pandas as pd
 # In[7]:
 
 
-lakehouse = mssparkutils.lakehouse.get(LH_Name)
+lakehouse = notebookutils.lakehouse.get(LH_Name)
 
 lh_abfs_path = lakehouse.get("properties").get("abfsPath")
 
@@ -87,5 +87,5 @@ for Id, Name in Workspaces.toLocalIterator():
 # In[12]:
 
 
-mssparkutils.session.stop()
+notebookutils.session.stop()
 

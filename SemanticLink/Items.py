@@ -11,7 +11,7 @@ def fnc_PrepareColumns(_Columns):
 Table_Name = 'Target_Table'
 LH_Name = "LH_Name"
 
-lakehouse = mssparkutils.lakehouse.get(LH_Name)
+lakehouse = notebookutils.lakehouse.get(LH_Name)
 lh_abfs_path = lakehouse.get("properties").get("abfsPath")
 
 workspaces = fabric.list_workspaces()
