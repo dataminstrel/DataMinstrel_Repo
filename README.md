@@ -1,1 +1,1 @@
-The code in here runs only when you attach a lakehouse to it, there is an option to mount a lakehouse and write to that in stead, but it hasn't been included (yet)
+In this github you can find the files that I use in my sessions as well as the pdf's with the slides
