@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# ## Measures
+# ## Ntb_Measures
 # 
-# New notebook
-
-# # Settings
+# null
 
 # In[1]:
 
@@ -16,16 +14,16 @@
 
 # In[2]:
 
-
-Table_Name = 'Measures'
+#'Measures' is a reserved table name, you can use it and the lakehouse will accept it, but when you connect to the sql endpoint it will start complaining
+Table_Name = 'Measures_table'
 LH_Name = "LH_SemanticLink_Data"
-LH_desc = "Lakehouse for Power BI usage monitoring"
 
 
 # In[3]:
 
 
 from pyspark.sql.functions import lit, current_timestamp
+import sempy_labs as sempy_labs
 import pandas as pd
 import sempy.fabric as fabric
 
@@ -34,7 +32,7 @@ import sempy.fabric as fabric
 
 
 # Mount the Lakehouse for direct file system access
-lakehouse = notebookutils.lakehouse.get(LH_Name)
+lakehouse = mssparkutils.lakehouse.get(LH_Name)
 
 # Retrieve and store local and ABFS paths of the mounted Lakehouse
 lh_abfs_path = lakehouse.get("properties").get("abfsPath")
@@ -52,16 +50,19 @@ def fnc_PrepareColumns(_Columns):
 # In[6]:
 
 
-SemanticModels = spark.sql("""select Id, WSID
-from LH_SemanticLink_Data.Items
-where Type='SemanticModel' and DisplayName<>'Report Usage Metrics Model'""")
+SQL_SemanticModels = F"select Id, WSID\
+                        from {LH_Name}.Items\
+                        where Type='SemanticModel' and DisplayName<>'Report Usage Metrics Model'"
+
+SemanticModels = spark.sql(SQL_SemanticModels)
 
 
 # In[7]:
 
 
 try:
-    spark.sql("TRUNCATE TABLE LH_SemanticLink_Data.Measures")
+    sql_truncate = f"TRUNCATE TABLE {LH_Name}.{Table_Name}"
+    spark.sql(sql_truncate)
 except Exception as e:
     print(f"truncate failed with error: {e}")
 
@@ -72,12 +73,9 @@ except Exception as e:
 for Id, WSID in SemanticModels.toLocalIterator():
     try:
         measures = fabric.list_measures(dataset=Id, workspace=WSID)
-        #print(measures)
         measures.drop('Detail Rows Definition', inplace=True, axis=1)
-        measures.drop('Format String Definition', inplace=True, axis=1)
-        
-        measuresdf = pd.DataFrame(measures)
-        
+        measures.drop('Format String Definition', inplace=True, axis=1)        
+        measuresdf = pd.DataFrame(measures)        
         if not measuresdf.empty: # check if the list is not empty to avoid errors
             measuresdf = fnc_PrepareColumns(measuresdf)
             sparkdf = spark.createDataFrame(measuresdf)
@@ -90,8 +88,8 @@ for Id, WSID in SemanticModels.toLocalIterator():
    
 
 
-# In[9]:
+# In[11]:
 
 
-notebookutils.session.stop()
+mssparkutils.session.stop()
 
